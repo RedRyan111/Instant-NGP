@@ -3,11 +3,11 @@ from tqdm import tqdm
 from data_loaders.tiny_data_loader import DataLoader
 # from data_loaders.lego_data_loader import DataLoader
 from display_utils.display_helper import display_image, create_video
-from NeRF.models.full_model import NerfModel
-from NeRF.nerf_forward_pass import EncodedModelInputs, ModelIteratorOverRayChunks
-from NeRF.positional_encoding import PositionalEncoding
-from NeRF.sample_points_from_rays import PointSamplerFromRays
-from NeRF.rays_from_camera_builder import RaysFromCameraBuilder
+from Instant_ngp.models.full_model import NerfModel
+from Instant_ngp.nerf_forward_pass import EncodedModelInputs, ModelIteratorOverRayChunks
+from Instant_ngp.positional_encoding import PositionalEncoding
+from Instant_ngp.sample_points_from_rays import PointSamplerFromRays
+from Instant_ngp.rays_from_camera_builder import RaysFromCameraBuilder
 from setup_utils import set_random_seeds, load_training_config_yaml, get_tensor_device
 
 set_random_seeds()

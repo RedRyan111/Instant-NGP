@@ -1,6 +1,6 @@
 import torch
 
-from NeRF.render_volume_density import render_volume_density
+from Instant_ngp.render_volume_density import render_volume_density
 
 
 class EncodedModelInputs:
