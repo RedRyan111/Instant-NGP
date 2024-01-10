@@ -20,13 +20,6 @@ class VoxelHash(nn.Module):
 
         num_of_hashes_per_dimension = size / resolution
 
-        self.voxel_spatial_matrix = torch.tensor([
-            [resolution/size, 0, 0, resolution/2],
-            [0, resolution/size, 0, resolution/2],
-            [0, 0, resolution/size, resolution/2],
-            [0, 0, 0, 1]
-        ]).T
-
         num_of_embeddings = (resolution+1) ** 3
         print(f'number of embeddings: {num_of_embeddings}')
 
@@ -84,10 +77,8 @@ class VoxelHash(nn.Module):
         indecis = torch.sum(cube_of_indecis, dim=2, dtype=torch.int)#self.xyz_indecis_to_embedding_indecis(cube_of_indecis)
 
         print(f'indecis: {indecis.shape}')
-        indecis = indecis.reshape(-1)
-        print(f'indecis: {indecis.shape}')
 
-        embeddings = self.embedding(indecis).reshape((xyz_tensor.shape[0], 8, -1))
+        embeddings = self.embedding(indecis)
         print(f'embeddings: {embeddings.shape}')
         #embedding = torch.cat(embeddings, dim=1)
 
