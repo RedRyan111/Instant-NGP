@@ -31,6 +31,8 @@ print(f'starting!')
 
 xyz_embeddings = voxel_hash.get_embedding(xyz_tensor)
 
+print(xyz_embeddings)
+
 #rand_tensor = torch.rand((2, 8, 2))
 #temp_1 = torch.rand((2, 2)).unsqueeze(1).expand_as(rand_tensor)
 #print(f'temp 1 shape: {temp_1.shape}')

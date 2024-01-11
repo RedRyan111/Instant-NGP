@@ -80,7 +80,7 @@ class VoxelHash(nn.Module):
         top_z_index = xyz_ceil[:, 2]
 
         #need to use this cube to get the weights for trilinear interpolation
-        cube_of_indecis = torch.stack([
+        cube_of_xyz_coords = torch.stack([
             torch.stack([bot_x_index, bot_y_index, bot_z_index], dim=1),
             torch.stack([bot_x_index, bot_y_index, top_z_index], dim=1),
             torch.stack([bot_x_index, top_y_index, bot_z_index], dim=1),
@@ -91,7 +91,7 @@ class VoxelHash(nn.Module):
             torch.stack([top_x_index, top_y_index, top_z_index], dim=1)
         ], dim=1)
 
-        return cube_of_indecis
+        return cube_of_xyz_coords
 
     def normalize_xyz(self, xyz_tensor):
         multiplier = self.resolution / self.size
@@ -101,18 +101,18 @@ class VoxelHash(nn.Module):
 
         print(f'cube of indecis for embeddings: {cube_of_indecis.shape}')
 
-        cube_of_indecis[:, :, 1] = cube_of_indecis[:, :, 2] * self.size
+        cube_of_indecis[:, :, 1] = cube_of_indecis[:, :, 1] * self.size
         cube_of_indecis[:, :, 2] = cube_of_indecis[:, :, 2] * self.size**2
 
         indecis = torch.sum(cube_of_indecis, dim=2, dtype=torch.int)
 
         print(f'indecis: {indecis.shape}')
-
+        print(indecis)
         embeddings = self.embedding(indecis)
 
         return embeddings
 
-
+'''
     def get_corner_embedding_vectors(self, xyz_tensor):
         multiplier = self.resolution / self.size
         xyz_tensor = multiplier * xyz_tensor + self.resolution/2
@@ -154,3 +154,4 @@ class VoxelHash(nn.Module):
         #embedding = torch.cat(embeddings, dim=1)
 
         return embeddings
+'''
