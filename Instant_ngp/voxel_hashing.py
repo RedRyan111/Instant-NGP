@@ -35,9 +35,62 @@ class VoxelHash(nn.Module):
     def get_embedding(self, xyz_tensor):
         corner_embeddings = self.get_corner_embedding_vectors(xyz_tensor)
 
+        corrected_xyz_tensor = self.normalize_xyz(xyz_tensor)
+
+
+        print(f'corrected xyz: {corrected_xyz_tensor.shape} corner embeddings: {corner_embeddings.shape}')
+
+        #corrected_xyz_tensor = corrected_xyz_tensor.unsqueeze(1).expand_as(corner_embeddings)
+
+        xyz_floor = torch.floor(xyz_tensor)
+        xyz_ceil = torch.ceil(xyz_tensor)
+
+        bot_x_index = xyz_floor[:, 0]
+        top_x_index = xyz_ceil[:, 0]
+        bot_y_index = xyz_floor[:, 1]
+        top_y_index = xyz_ceil[:, 1]
+        bot_z_index = xyz_floor[:, 2]
+        top_z_index = xyz_ceil[:, 2]
+
+        cube_of_xyz_coords = torch.stack([
+            torch.stack([bot_x_index, bot_y_index, bot_z_index], dim=1),
+            torch.stack([bot_x_index, bot_y_index, top_z_index], dim=1),
+            torch.stack([bot_x_index, top_y_index, bot_z_index], dim=1),
+            torch.stack([bot_x_index, top_y_index, top_z_index], dim=1),
+            torch.stack([top_x_index, bot_y_index, bot_z_index], dim=1),
+            torch.stack([top_x_index, bot_y_index, top_z_index], dim=1),
+            torch.stack([top_x_index, top_y_index, bot_z_index], dim=1),
+            torch.stack([top_x_index, top_y_index, top_z_index], dim=1)
+        ], dim=1)
+
+        print(f'cub of coords" {cube_of_xyz_coords.shape}')
+
+        corrected_xyz_tensor = corrected_xyz_tensor.unsqueeze(1).expand_as(cube_of_xyz_coords)
+
+        print(f'corrected xyz : {corrected_xyz_tensor.shape}')
+
+        sub_vectors = (cube_of_xyz_coords - corrected_xyz_tensor)**2
+        distance_vectors = torch.sqrt(torch.sum(sub_vectors, dim=2)) #maybe square root isn't neccessary?
+        print(f'distance vectors: {distance_vectors.shape}')
+
+        sum_of_distances = torch.sum(distance_vectors, dim=1).reshape((-1, 1)).expand_as(distance_vectors)
+        print(f'sum of distances: {sum_of_distances.shape}')
+
+        normalized_distance = distance_vectors / sum_of_distances
+        print(f'normalized distance vectors: {normalized_distance.shape}')
+
+        print(f'corner embeddings: {corner_embeddings.shape}')
+
+        final_embeddings = torch.sum(normalized_distance.unsqueeze(2) * corner_embeddings, dim=1)
+        print(f'final embedding: {final_embeddings.shape}')
+
         # trilinearly interpolate
 
-        return 0
+        return final_embeddings
+
+    def normalize_xyz(self, xyz_tensor):
+        multiplier = self.resolution / self.size
+        return multiplier * xyz_tensor + self.resolution / 2
 
     def get_corner_embedding_vectors(self, xyz_tensor):
         multiplier = self.resolution / self.size
@@ -61,6 +114,7 @@ class VoxelHash(nn.Module):
 
         print(f'temp shape: {temp.shape}')
 
+        #need to use this cube to get the weights for trilinear interpolation
         cube_of_indecis = torch.stack([
             torch.stack([bot_x_index, bot_y_index, bot_z_index], dim=1),
             torch.stack([bot_x_index, bot_y_index, top_z_index], dim=1),
@@ -74,7 +128,7 @@ class VoxelHash(nn.Module):
 
         print(f'cube of indecis: {cube_of_indecis.shape}')
 
-        indecis = torch.sum(cube_of_indecis, dim=2, dtype=torch.int)#self.xyz_indecis_to_embedding_indecis(cube_of_indecis)
+        indecis = torch.sum(cube_of_indecis, dim=2, dtype=torch.int)
 
         print(f'indecis: {indecis.shape}')
 
