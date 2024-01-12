@@ -52,6 +52,7 @@ class ModelIteratorOverRayChunks(object):
             raise StopIteration
 
         self.chunk_index += 1
+        #replace encoded points with embedding algorithm
         encoded_points = self.encoded_query_points[self.chunk_index]
         encoded_ray_origins = self.encoded_ray_directions[self.chunk_index]
 

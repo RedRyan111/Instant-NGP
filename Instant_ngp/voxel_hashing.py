@@ -1,14 +1,20 @@
 import torch
 import torch.nn as nn
-import math
-from itertools import permutations
 
 
 class HashManager(nn.Module):
-    def __init__(self, number_of_hashes):
+    def __init__(self, size, resolutions, embedding_lengths):
         super().__init__()
+        self.number_of_hashes = len(resolutions)
 
-        hash_list = [VoxelHash() for i in range(number_of_hashes)]
+        self.hash_list = [VoxelHash(size, resolutions[i], embedding_lengths[i]) for i in range(self.number_of_hashes)]
+
+    def forward(self, xyz):
+        embeddings = []
+        for hasher in self.hash_list:
+            embeddings.append(hasher(xyz))
+
+        return torch.cat(embeddings, dim=-1)
 
 
 class VoxelHash(nn.Module):
@@ -21,7 +27,7 @@ class VoxelHash(nn.Module):
         num_of_hashes_per_dimension = size / resolution
 
         num_of_embeddings = (resolution+1) ** 3
-        print(f'number of embeddings: {num_of_embeddings}')
+        #print(f'number of embeddings: {num_of_embeddings}')
 
         self.embedding = nn.Embedding(num_of_embeddings, embedding_length)
 
@@ -29,43 +35,39 @@ class VoxelHash(nn.Module):
     #    if x > self.size or y > self.size or z > self.size:
     #        raise
 
-    def linear_interpolation(self):
-        return 0
-
-    def get_embedding(self, xyz_tensor):
-        #corner_embeddings = self.get_corner_embedding_vectors(xyz_tensor)
-
-        corrected_xyz_tensor = self.normalize_xyz(xyz_tensor)
+    #get embeddings
+    def forward(self, xyz_tensor):
+        normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)
 
         cube_of_xyz_coords = self.get_cube_of_xyz_coords(xyz_tensor)
-        print(f'cube of coords: {cube_of_xyz_coords.shape}')
+        #print(f'cube of coords: {cube_of_xyz_coords.shape}')
 
         corner_embeddings = self.get_corner_embeddings_from_cube_of_xyz_coords(cube_of_xyz_coords)
-        print(f'corner_embeddings: {corner_embeddings.shape}')
+        #print(f'corner_embeddings: {corner_embeddings.shape}')
 
         #trilinearyly interpolate corner embeddings and xyz_tensor
 
-        corrected_xyz_tensor = corrected_xyz_tensor.unsqueeze(1).expand_as(cube_of_xyz_coords)
-        print(f'corrected xyz: {corrected_xyz_tensor.shape}')
+        normalized_xyz_tensor = normalized_xyz_tensor.unsqueeze(1).expand_as(cube_of_xyz_coords)
+        #print(f'corrected xyz: {normalized_xyz_tensor.shape}')
 
-        sub_vectors = (cube_of_xyz_coords - corrected_xyz_tensor)**2
+        sub_vectors = (cube_of_xyz_coords - normalized_xyz_tensor)**2
         distance_vectors = torch.sqrt(torch.sum(sub_vectors, dim=2)) #maybe square root isn't neccessary?
-        print(f'distance vectors: {distance_vectors.shape}')
+        #print(f'distance vectors: {distance_vectors.shape}')
 
         sum_of_distances = torch.sum(distance_vectors, dim=1).reshape((-1, 1)).expand_as(distance_vectors)
-        print(f'sum of distances: {sum_of_distances.shape}')
+        #print(f'sum of distances: {sum_of_distances.shape}')
 
         normalized_distance = distance_vectors / sum_of_distances
-        print(f'normalized distance vectors: {normalized_distance.shape}')
+        #print(f'normalized distance vectors: {normalized_distance.shape}')
 
         final_embeddings = torch.sum(normalized_distance.unsqueeze(2) * corner_embeddings, dim=1) #weighted sum
-        print(f'final embedding: {final_embeddings.shape}')
+        #print(f'final embedding: {final_embeddings.shape}')
 
         return final_embeddings
 
     def get_cube_of_xyz_coords(self, xyz_tensor):
         xyz_tensor = self.normalize_xyz(xyz_tensor)
-        print(f'xyz tensor shape: {xyz_tensor.shape}')
+        #print(f'xyz tensor shape: {xyz_tensor.shape}')
 
         xyz_floor = torch.floor(xyz_tensor)
         xyz_ceil = torch.ceil(xyz_tensor)
@@ -97,15 +99,15 @@ class VoxelHash(nn.Module):
 
     def get_corner_embeddings_from_cube_of_xyz_coords(self, cube_of_xyz_coords):
 
-        print(f'cube of indecis for embeddings: {cube_of_xyz_coords.shape}')
+        #print(f'cube of indecis for embeddings: {cube_of_xyz_coords.shape}')
 
         cube_of_xyz_coords[:, :, 1] = cube_of_xyz_coords[:, :, 1] * self.size
         cube_of_xyz_coords[:, :, 2] = cube_of_xyz_coords[:, :, 2] * self.size ** 2
 
         indecis = torch.sum(cube_of_xyz_coords, dim=2, dtype=torch.int)
 
-        print(f'indecis: {indecis.shape}')
-        print(indecis)
+        #print(f'indecis: {indecis.shape}')
+        #print(indecis)
         embeddings = self.embedding(indecis)
 
         return embeddings

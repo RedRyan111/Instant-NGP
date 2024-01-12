@@ -1,5 +1,7 @@
 import torch
 from tqdm import tqdm
+
+from Instant_ngp.voxel_hashing import HashManager
 from data_loaders.tiny_data_loader import DataLoader
 # from data_loaders.lego_data_loader import DataLoader
 from display_utils.display_helper import display_image, create_video
@@ -22,12 +24,16 @@ num_positional_encoding_functions = training_config['positional_encoding']['num_
 num_directional_encoding_functions = training_config['positional_encoding']['num_directional_encoding_functions']
 depth_samples_per_ray = training_config['rendering_variables']['depth_samples_per_ray']
 chunksize = training_config['rendering_variables']['samples_per_model_forward_pass']
+size = 4
+resolutions = [3, 5, 7]
+embedding_lengths = [3, 3, 5]
 
 # Misc parameters
 display_every = training_config['display_variables']['display_every']
 
 # Specify encoding classes
-position_encoder = PositionalEncoding(3, num_positional_encoding_functions, True)
+#position_encoder = PositionalEncoding(3, num_positional_encoding_functions, True)
+position_encoder = HashManager(size, resolutions, embedding_lengths)
 direction_encoder = PositionalEncoding(3, num_directional_encoding_functions, True)
 
 # Initialize model and optimizer

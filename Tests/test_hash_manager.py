@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Instant_ngp.voxel_hashing import VoxelHash
+from Instant_ngp.voxel_hashing import HashManager
 
 
 size = 3
@@ -14,9 +14,10 @@ for i in range(num_of_embeddings):
         embedding.weight[i] = i * torch.ones(embedding_length)
     print(f'index: {i} weight: {embedding.weight[i]}')
 
+resolutions = [3, 5]
+embedding_lengths = [3, 3]
 
-voxel_hash = VoxelHash(size, resolution, embedding_length)
-voxel_hash.embedding = embedding
+voxel_manager = HashManager(size, resolutions, embedding_lengths)
 
 xyz_tensor = torch.cat([torch.zeros(1, 3)-1.49, torch.zeros(1, 3)+1.49], dim=0)
 print(f'xyz tensor: ')
@@ -29,6 +30,6 @@ print(f'starting!')
 #print(f'embedding: {corner_embeddings}')
 
 
-xyz_embeddings = voxel_hash.get_embedding(xyz_tensor)
+xyz_embeddings = voxel_manager(xyz_tensor)
 
 print(xyz_embeddings)
