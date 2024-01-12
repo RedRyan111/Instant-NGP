@@ -37,14 +37,17 @@ class VoxelHash(nn.Module):
         if indecis.shape[0] != 0:
             raise Exception(f'Embedding is out of bounds!!: {indecis}')
 
+    def is_in_indecis(self, xyz_tensor):
+        return 0
+
     #get embeddings
     def forward(self, xyz_tensor):
+        print(f'xyz tensor: {xyz_tensor.shape}')
         self.is_in_bounds(xyz_tensor)
 
         normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)
 
         cube_of_xyz_coords = self.get_cube_of_xyz_coords(xyz_tensor)
-        #print(f'cube of coords: {cube_of_xyz_coords.shape}')
 
         corner_embeddings = self.get_corner_embeddings_from_cube_of_xyz_coords(cube_of_xyz_coords)
         #print(f'corner_embeddings: {corner_embeddings.shape}')
@@ -105,12 +108,14 @@ class VoxelHash(nn.Module):
 
         #print(f'cube of indecis for embeddings: {cube_of_xyz_coords.shape}')
 
-        cube_of_xyz_coords[:, :, 1] = cube_of_xyz_coords[:, :, 1] * self.size
-        cube_of_xyz_coords[:, :, 2] = cube_of_xyz_coords[:, :, 2] * self.size ** 2
+        cube_of_xyz_coords[:, :, 1] = cube_of_xyz_coords[:, :, 1] * self.resolution
+        cube_of_xyz_coords[:, :, 2] = cube_of_xyz_coords[:, :, 2] * self.resolution ** 2
 
         indecis = torch.sum(cube_of_xyz_coords, dim=2, dtype=torch.int)
 
-        #print(f'indecis: {indecis.shape}')
+        #print(f'max indecis: {torch.max(indecis)} max possible: {self.resolution**3} resolution: {self.resolution}')
+        #argmax = torch.argmax(indecis)
+        #print(cube_of_xyz_coords[argmax])
         #print(indecis)
         embeddings = self.embedding(indecis)
 
