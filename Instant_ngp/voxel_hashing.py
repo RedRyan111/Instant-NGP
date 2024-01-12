@@ -42,7 +42,6 @@ class VoxelHash(nn.Module):
 
     #get embeddings
     def forward(self, xyz_tensor):
-        print(f'xyz tensor: {xyz_tensor.shape}')
         self.is_in_bounds(xyz_tensor)
 
         normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)

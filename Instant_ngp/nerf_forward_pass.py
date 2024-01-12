@@ -21,12 +21,8 @@ class EncodedModelInputs:
 
         ray_directions = expand_ray_directions_to_fit_ray_query_points(ray_directions, query_points)
 
-        print(f'query points: {query_points.shape}')
-
         encoded_query_points = self.pos_encoding_function.forward(query_points.reshape(-1, 3)).reshape((10000, 50, -1))
         encoded_ray_directions = self.dir_encoding_function.forward(ray_directions)
-
-        print(f'encoded query points: {encoded_query_points.shape}')
 
         return encoded_query_points, encoded_ray_directions, depth_values
 
@@ -63,8 +59,6 @@ class ModelIteratorOverRayChunks(object):
         depth_values = self.depth_values[self.chunk_index]
 
         rgb, density = self.model(encoded_points, encoded_ray_origins)
-
-        print(f'rgb: {rgb.shape} density: {density.shape} depth: {depth_values.shape}')
 
         rgb_predicted = render_volume_density(rgb, density, depth_values)
 

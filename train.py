@@ -14,7 +14,7 @@ from setup_utils import set_random_seeds, load_training_config_yaml, get_tensor_
 
 set_random_seeds()
 training_config = load_training_config_yaml()
-device = 'cpu'#get_tensor_device()
+device = get_tensor_device()
 data_manager = DataLoader(device)
 
 # training parameters
@@ -25,7 +25,7 @@ num_directional_encoding_functions = training_config['positional_encoding']['num
 depth_samples_per_ray = training_config['rendering_variables']['depth_samples_per_ray']
 chunksize = training_config['rendering_variables']['samples_per_model_forward_pass']
 size = 10
-resolutions = [3, 5, 7, 13, 15, 18]
+resolutions = [3, 5, 7, 13, 15, 18]#[2, 4, 8, 16, 32, 64]
 embedding_lengths = [15, 13, 11, 8, 8, 8]
 
 # Misc parameters
