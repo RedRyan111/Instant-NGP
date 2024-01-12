@@ -3,11 +3,11 @@ import torch.nn as nn
 
 
 class HashManager(nn.Module):
-    def __init__(self, size, resolutions, embedding_lengths):
+    def __init__(self, size, resolutions, embedding_lengths, device):
         super().__init__()
         self.number_of_hashes = len(resolutions)
 
-        self.hash_list = [VoxelHash(size, resolutions[i], embedding_lengths[i]) for i in range(self.number_of_hashes)]
+        self.hash_list = [VoxelHash(size, resolutions[i], embedding_lengths[i]).to(device) for i in range(self.number_of_hashes)]
 
     def forward(self, xyz):
         embeddings = []
@@ -31,12 +31,16 @@ class VoxelHash(nn.Module):
 
         self.embedding = nn.Embedding(num_of_embeddings, embedding_length)
 
-    #def is_in_bounds(self, x, y, z):
-    #    if x > self.size or y > self.size or z > self.size:
-    #        raise
+    def is_in_bounds(self, xyz_tensor):
+        greater_than_size = torch.sum(torch.abs(xyz_tensor) > self.size/2, dim=-1)
+        indecis = greater_than_size.nonzero().reshape(-1)
+        if indecis.shape[0] != 0:
+            raise Exception(f'Embedding is out of bounds!!: {indecis}')
 
     #get embeddings
     def forward(self, xyz_tensor):
+        self.is_in_bounds(xyz_tensor)
+
         normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)
 
         cube_of_xyz_coords = self.get_cube_of_xyz_coords(xyz_tensor)

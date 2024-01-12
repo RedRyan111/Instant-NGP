@@ -27,6 +27,8 @@ class NerfModel(torch.nn.Module):
         self.sig = torch.nn.Sigmoid()
 
     def forward(self, x, d):
+        print(f'x: {x.shape} d: {d.shape}')
+
         y = self.relu(self.layer1(x))
         y = self.relu(self.layer2(y))
         y = self.relu(self.layer3(y))
