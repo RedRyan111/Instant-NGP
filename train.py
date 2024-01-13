@@ -25,9 +25,12 @@ num_directional_encoding_functions = training_config['positional_encoding']['num
 depth_samples_per_ray = training_config['rendering_variables']['depth_samples_per_ray']
 chunksize = training_config['rendering_variables']['samples_per_model_forward_pass']
 size = 10
-resolutions = [3, 5, 7, 13, 15, 18]#[2, 4, 8, 16, 32, 64]
-embedding_lengths = [15, 13, 11, 8, 8, 8]
-
+resolutions = [i*1.5 for i in range(12, 40)]#[i*1.5 for i in range(3, 20)]##[3, 4, 5, 6, 7, 8]#[2, 4, 8, 16, 32, 64]
+embedding_lengths = [9 for i in range(12, 40)]#[13 for i in range(3, 20)]##[10, 10, 10, 11, 11, 11]
+#resolutions = [3, 4.5, 6, 7.5, 9, 10.5, 12, 13.5, 16]#[2, 4, 8, 16, 32, 64]
+#embedding_lengths = [7, 7, 7, 7, 7, 7, 7, 7, 7]
+num_positional_encoding_functions = sum(embedding_lengths)
+print(f'{len(resolutions)} {len(embedding_lengths)}')
 # Misc parameters
 display_every = training_config['display_variables']['display_every']
 

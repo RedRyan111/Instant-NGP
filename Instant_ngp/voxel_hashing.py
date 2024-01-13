@@ -1,3 +1,5 @@
+import math
+
 import torch
 import torch.nn as nn
 
@@ -6,7 +8,7 @@ class HashManager(nn.Module):
     def __init__(self, size, resolutions, embedding_lengths, device):
         super().__init__()
         self.number_of_hashes = len(resolutions)
-
+        print(f'res len: {len(resolutions)} emb len: {len(embedding_lengths)}')
         self.hash_list = [VoxelHash(size, resolutions[i], embedding_lengths[i]).to(device) for i in range(self.number_of_hashes)]
 
     def forward(self, xyz):
@@ -26,10 +28,13 @@ class VoxelHash(nn.Module):
 
         num_of_hashes_per_dimension = size / resolution
 
-        num_of_embeddings = (resolution+1) ** 3
-        #print(f'number of embeddings: {num_of_embeddings}')
+        num_of_embeddings = math.ceil((resolution+1) ** 3)
+        print(f'number of embeddings: {num_of_embeddings}')
 
         self.embedding = nn.Embedding(num_of_embeddings, embedding_length)
+        #for i in range(num_of_embeddings):
+        #    with torch.no_grad():
+        #        self.embedding.weight[i] = torch.nn.Parameter(torch.rand(embedding_length))
 
     def is_in_bounds(self, xyz_tensor):
         greater_than_size = torch.sum(torch.abs(xyz_tensor) > self.size/2, dim=-1)
@@ -42,6 +47,8 @@ class VoxelHash(nn.Module):
 
     #get embeddings
     def forward(self, xyz_tensor):
+        xyz_shape = xyz_tensor.shape
+        xyz_tensor = xyz_tensor.reshape(-1, 3)
         self.is_in_bounds(xyz_tensor)
 
         normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)
@@ -68,8 +75,8 @@ class VoxelHash(nn.Module):
 
         final_embeddings = torch.sum(normalized_distance.unsqueeze(2) * corner_embeddings, dim=1) #weighted sum
         #print(f'final embedding: {final_embeddings.shape}')
-
-        return final_embeddings
+        #print(f'shape: {xyz_shape}')
+        return final_embeddings.reshape((xyz_shape[0]*xyz_shape[1], xyz_shape[2], -1))
 
     def get_cube_of_xyz_coords(self, xyz_tensor):
         xyz_tensor = self.normalize_xyz(xyz_tensor)

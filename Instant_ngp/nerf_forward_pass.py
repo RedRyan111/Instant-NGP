@@ -21,7 +21,7 @@ class EncodedModelInputs:
 
         ray_directions = expand_ray_directions_to_fit_ray_query_points(ray_directions, query_points)
 
-        encoded_query_points = self.pos_encoding_function.forward(query_points.reshape(-1, 3)).reshape((10000, 50, -1))
+        encoded_query_points = self.pos_encoding_function.forward(query_points)#query_points.reshape(-1, 3)).reshape((10000, 50, -1))
         encoded_ray_directions = self.dir_encoding_function.forward(ray_directions)
 
         return encoded_query_points, encoded_ray_directions, depth_values
