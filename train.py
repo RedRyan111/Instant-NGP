@@ -20,7 +20,7 @@ data_manager = DataLoader(device)
 # training parameters
 lr = training_config['training_variables']['learning_rate']
 num_iters = training_config['training_variables']['num_iters']
-num_positional_encoding_functions = training_config['positional_encoding']['num_positional_encoding_functions']
+#num_positional_encoding_functions = training_config['positional_encoding']['num_positional_encoding_functions']
 num_directional_encoding_functions = training_config['positional_encoding']['num_directional_encoding_functions']
 depth_samples_per_ray = training_config['rendering_variables']['depth_samples_per_ray']
 chunksize = training_config['rendering_variables']['samples_per_model_forward_pass']
@@ -38,6 +38,7 @@ display_every = training_config['display_variables']['display_every']
 #position_encoder = PositionalEncoding(3, num_positional_encoding_functions, True)
 position_encoder = HashManager(size, resolutions, embedding_lengths, device)#.to(device)
 direction_encoder = PositionalEncoding(3, num_directional_encoding_functions, device, True)
+collision_detection = ()
 
 # Initialize model and optimizer
 model = NerfModel(num_positional_encoding_functions, num_directional_encoding_functions).to(device)
