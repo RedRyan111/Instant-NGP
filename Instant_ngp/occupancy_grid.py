@@ -9,7 +9,15 @@ class OccupancyManager(nn.Module):
         super().__init__()
         self.occupancy_hash = VoxelHash(size, resolution, embedding_length).to(device)
 
-    def sample(self):
+    def sample(self, position, direction):
+        testable_range = torch.arange(2, 100)#.repeat() #set range scale
+
+
+
+
+
+        #get parametric equations?
+
         return 0
 
     def forward(self, xyz):
