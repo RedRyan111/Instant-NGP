@@ -35,7 +35,6 @@ print(f'{len(resolutions)} {len(embedding_lengths)}')
 display_every = training_config['display_variables']['display_every']
 
 # Specify encoding classes
-#position_encoder = PositionalEncoding(3, num_positional_encoding_functions, True)
 position_encoder = HashManager(size, resolutions, embedding_lengths, device)#.to(device)
 direction_encoder = PositionalEncoding(3, num_directional_encoding_functions, device, True)
 collision_detection = ()

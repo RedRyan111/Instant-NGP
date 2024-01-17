@@ -1,22 +1,31 @@
 import torch
 import torch.nn as nn
-from Instant_ngp.voxel_hashing import VoxelHash
+from tqdm import tqdm
 
+from Instant_ngp.occupancy_grid import OccupancyManager
+from Instant_ngp.rays_from_camera_builder import RaysFromCameraBuilder
+from data_loaders.tiny_data_loader import DataLoader
+from setup_utils import get_tensor_device
+
+device = get_tensor_device()
+data_manager = DataLoader(device)
+rays_from_camera_builder = RaysFromCameraBuilder(data_manager, device)
+
+num_iters = 1
+for i in tqdm(range(num_iters)):
+    target_img, target_tform_cam2world = data_manager.get_image_and_pose(i)
+
+    ray_origins, ray_directions = rays_from_camera_builder.ray_origins_and_directions_from_pose(target_tform_cam2world)
+
+    print(f'ray origins: {ray_origins.shape} ray directions: {ray_directions.shape}')
 
 size = 3
 resolution = 2
 embedding_length = 1
 
-num_of_embeddings = (resolution + 1) ** 3
-embedding = nn.Embedding(num_of_embeddings, embedding_length)
-for i in range(num_of_embeddings):
-    with torch.no_grad():
-        embedding.weight[i] = i * torch.ones(embedding_length)
-    print(f'index: {i} weight: {embedding.weight[i]}')
+voxel_hash = OccupancyManager(size, resolution, embedding_length, device)
 
 
-voxel_hash = VoxelHash(size, resolution, embedding_length)
-voxel_hash.embedding = embedding
 
 xyz_tensor = torch.cat([torch.zeros(1, 3)-1.49, torch.zeros(1, 3)+1.49], dim=0)
 print(f'xyz tensor: ')
