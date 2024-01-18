@@ -11,6 +11,12 @@ device = get_tensor_device()
 data_manager = DataLoader(device)
 rays_from_camera_builder = RaysFromCameraBuilder(data_manager, device)
 
+size = 3
+resolution = 2
+embedding_length = 1
+
+voxel_hash = OccupancyManager(size, resolution, embedding_length, device)
+
 num_iters = 1
 for i in tqdm(range(num_iters)):
     target_img, target_tform_cam2world = data_manager.get_image_and_pose(i)
@@ -19,17 +25,8 @@ for i in tqdm(range(num_iters)):
 
     print(f'ray origins: {ray_origins.shape} ray directions: {ray_directions.shape}')
 
-size = 3
-resolution = 2
-embedding_length = 1
+    voxel_hash.sample(ray_origins, ray_directions)
 
-voxel_hash = OccupancyManager(size, resolution, embedding_length, device)
-
-
-
-xyz_tensor = torch.cat([torch.zeros(1, 3)-1.49, torch.zeros(1, 3)+1.49], dim=0)
-print(f'xyz tensor: ')
-print(xyz_tensor.shape)
 
 #corner_embeddings = voxel_hash.get_corner_embedding_vectors(xyz_tensor)
 
@@ -37,7 +34,3 @@ print(f'starting!')
 
 #print(f'embedding: {corner_embeddings}')
 
-
-xyz_embeddings = voxel_hash.get_embedding(xyz_tensor)
-
-print(xyz_embeddings)
