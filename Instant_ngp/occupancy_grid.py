@@ -35,28 +35,32 @@ class OccupancyManager(nn.Module):
         self.resolution = resolution
         self.testable_range = size * ((torch.arange(self.resolution + 1) / self.resolution) - .5)
         self.testable_range = self.testable_range.to(device)
-        self.stacked_range = torch.stack([self.testable_range, self.testable_range, self.testable_range])
+        self.stacked_range = self.testable_range.repeat(3)
         self.grid_size = size / resolution
 
     def sample(self, position, direction):
-        position = NewRays(position)
-        direction = NewRays(direction)
+        #position = NewRays(position)
+        #direction = NewRays(direction)
         # testable_range = #.repeat() #set range scale
+        position = position.reshape((-1, 3))
+        position = torch.repeat_interleave(position, 3, dim=1)
+        print(f'position: -----------------------------------')
+        print(position[0:2])
+
+        direction = direction.reshape((-1, 3))
+        direction = torch.repeat_interleave(direction, 3, dim=1)
+        print(f'direction: -----------------------------------')
+        print(direction[0:2])
 
         print(f'stacked range: {self.stacked_range.shape}')
         print(f'grid size {self.grid_size}')
         print(f'stacked range: {self.stacked_range}')
 
         print(f'position: {position.shape} direction: {direction.shape}')
-
-        print(f'testable range: {self.testable_range.shape} position: {position.x.shape}')
-        stacked_x = position.x.repeat(3).reshape(-1, 3)
-        #stacked_x = torch.stack([position.x, position.x, position.x])
-        print(f'stacked x: {stacked_x.shape}')
-        diff = self.testable_range - stacked_x
+        diff = self.stacked_range - position
         print(f'diff: {diff.shape}')
 
-        print(f'repeated: {stacked_x[0:2]}')
+        #print(f'repeated: {stacked_x[0:2]}')
 
         # get parametric equations?
 
