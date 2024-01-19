@@ -29,6 +29,6 @@ print(f'starting!')
 #print(f'embedding: {corner_embeddings}')
 
 
-xyz_embeddings = voxel_hash.get_embedding(xyz_tensor)
+xyz_embeddings = voxel_hash(xyz_tensor)
 
 print(xyz_embeddings)

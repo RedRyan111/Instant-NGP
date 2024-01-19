@@ -44,11 +44,8 @@ class VoxelHash(nn.Module):
 
     #get embeddings
     def forward(self, xyz_tensor):
-        xyz_shape = xyz_tensor.shape
         xyz_tensor = xyz_tensor.reshape(-1, 3)
         self.is_in_bounds(xyz_tensor)
-
-        normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)
 
         cube_of_xyz_coords = self.get_cube_of_xyz_coords(xyz_tensor)
 
@@ -56,6 +53,15 @@ class VoxelHash(nn.Module):
         #print(f'corner_embeddings: {corner_embeddings.shape}')
 
         #trilinearyly interpolate corner embeddings and xyz_tensor
+        normalized_embedding_distances = self.get_weights_for_embeddings(xyz_tensor, cube_of_xyz_coords)
+
+        final_embeddings = torch.sum(normalized_embedding_distances.unsqueeze(2) * corner_embeddings, dim=1) #weighted sum
+        #print(f'final embedding: {final_embeddings.shape}')
+        #print(f'shape: {xyz_shape}')
+        return final_embeddings.reshape((-1, self.embedding_length))
+
+    def get_weights_for_embeddings(self, xyz_tensor, cube_of_xyz_coords):
+        normalized_xyz_tensor = self.normalize_xyz(xyz_tensor)
 
         normalized_xyz_tensor = normalized_xyz_tensor.unsqueeze(1).expand_as(cube_of_xyz_coords)
         #print(f'corrected xyz: {normalized_xyz_tensor.shape}')
@@ -70,10 +76,7 @@ class VoxelHash(nn.Module):
         normalized_distance = distance_vectors / sum_of_distances
         #print(f'normalized distance vectors: {normalized_distance.shape}')
 
-        final_embeddings = torch.sum(normalized_distance.unsqueeze(2) * corner_embeddings, dim=1) #weighted sum
-        #print(f'final embedding: {final_embeddings.shape}')
-        #print(f'shape: {xyz_shape}')
-        return final_embeddings.reshape((xyz_shape[0]*xyz_shape[1], xyz_shape[2], -1))
+        return normalized_distance
 
     def get_cube_of_xyz_coords(self, xyz_tensor):
         xyz_tensor = self.normalize_xyz(xyz_tensor)
