@@ -17,17 +17,6 @@ def calculate_intersection_with_plane(point, axis):
     return 0
 
 
-class NewRays:
-    def __init__(self, position):
-        position = position.reshape(-1, 3)
-        self.shape = position.shape
-        self.x = position[:, 0]
-        self.y = position[:, 1]
-        self.z = position[:, 2]
-
-    def __shape__(self):
-        return self.shape
-
 class OccupancyManager(nn.Module):
     def __init__(self, size, resolution, embedding_length, device):
         super().__init__()
@@ -38,17 +27,14 @@ class OccupancyManager(nn.Module):
         self.stacked_range = self.testable_range.repeat(3)
         self.grid_size = size / resolution
 
-    def sample(self, position, direction):
-        #position = NewRays(position)
-        #direction = NewRays(direction)
-        # testable_range = #.repeat() #set range scale
+    def get_all_t_boundaries_from_rays(self, position, direction):
         position = position.reshape((-1, 3))
-        position = torch.repeat_interleave(position, 3, dim=1)
+        position = torch.repeat_interleave(position, self.resolution+1, dim=1)
         print(f'position: -----------------------------------')
         print(position[0:2])
 
         direction = direction.reshape((-1, 3))
-        direction = torch.repeat_interleave(direction, 3, dim=1)
+        direction = torch.repeat_interleave(direction, self.resolution+1, dim=1)
         print(f'direction: -----------------------------------')
         print(direction[0:2])
 
@@ -57,12 +43,27 @@ class OccupancyManager(nn.Module):
         print(f'stacked range: {self.stacked_range}')
 
         print(f'position: {position.shape} direction: {direction.shape}')
-        diff = self.stacked_range - position
-        print(f'diff: {diff.shape}')
 
-        #print(f'repeated: {stacked_x[0:2]}')
+        t = (self.stacked_range - position) / direction
+        print(f'div: {t.shape}')
+        print(t[0:2])
 
-        # get parametric equations?
+        return t
+
+    def sample(self, position, direction):
+        t = self.get_all_t_boundaries_from_rays(position, direction)
+
+        t = t + self.grid_size / 2  # small enough to not go to neighboring bounding boxes, gets inbetween indecis
+
+        min_t = torch.where(t > -1 * self.grid_size, t, self.grid_size)
+        valid_t = torch.where(min_t < self.grid_size, min_t, self.grid_size)
+
+        sorted_t, indecis_t = torch.sort(valid_t, dim=1)
+
+        print(f'valid t: {sorted_t.shape}')
+        print(sorted_t[0:2])
+
+        #scale and then round to indecis
 
         return 0
 

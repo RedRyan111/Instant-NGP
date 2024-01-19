@@ -32,9 +32,6 @@ class VoxelHash(nn.Module):
         print(f'number of embeddings: {num_of_embeddings}')
 
         self.embedding = nn.Embedding(num_of_embeddings, embedding_length)
-        #for i in range(num_of_embeddings):
-        #    with torch.no_grad():
-        #        self.embedding.weight[i] = torch.nn.Parameter(torch.rand(embedding_length))
 
     def is_in_bounds(self, xyz_tensor):
         greater_than_size = torch.sum(torch.abs(xyz_tensor) > self.size/2, dim=-1)
