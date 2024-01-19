@@ -27,14 +27,17 @@ class OccupancyManager(nn.Module):
         self.stacked_range = self.testable_range.repeat(3)
         self.grid_size = size / resolution
 
+    def fit_tensor_to_range(self, inp_tensor):
+        inp_tensor = inp_tensor.reshape((-1, 3))
+        inp_tensor = torch.repeat_interleave(inp_tensor, self.resolution+1, dim=1)
+        return inp_tensor
+
     def get_all_t_boundaries_from_rays(self, position, direction):
-        position = position.reshape((-1, 3))
-        position = torch.repeat_interleave(position, self.resolution+1, dim=1)
+        position = self.fit_tensor_to_range(position)
         print(f'position: -----------------------------------')
         print(position[0:2])
 
-        direction = direction.reshape((-1, 3))
-        direction = torch.repeat_interleave(direction, self.resolution+1, dim=1)
+        direction = self.fit_tensor_to_range(direction)
         print(f'direction: -----------------------------------')
         print(direction[0:2])
 
@@ -64,6 +67,9 @@ class OccupancyManager(nn.Module):
         print(sorted_t[0:2])
 
         #scale and then round to indecis
+        #can be optimized if the CENTERS of the bounding boxes are used instead!!!!
+        #can get rid of addition
+        #can get rid of unused corners
 
         return 0
 
@@ -73,7 +79,3 @@ class OccupancyManager(nn.Module):
             embeddings.append(hasher(xyz))
 
         return torch.cat(embeddings, dim=-1)
-
-
-def solve_for_t_in_parametric_equations():
-    return 0
