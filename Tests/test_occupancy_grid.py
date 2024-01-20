@@ -12,7 +12,7 @@ data_manager = DataLoader(device)
 rays_from_camera_builder = RaysFromCameraBuilder(data_manager, device)
 
 size = 3
-resolution = 2
+resolution = 3
 embedding_length = 1
 
 voxel_hash = OccupancyManager(size, resolution, embedding_length, device)

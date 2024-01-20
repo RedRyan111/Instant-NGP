@@ -55,21 +55,25 @@ class OccupancyManager(nn.Module):
 
     def sample(self, position, direction):
         t = self.get_all_t_boundaries_from_rays(position, direction)
+        print(f't: {t.shape}')
 
-        t = t + self.grid_size / 2  # small enough to not go to neighboring bounding boxes, gets inbetween indecis
+        #might be able to get rid of permute with earlier shape optimizations
+        #t = t.reshape(-1, 3, self.resolution+1).permute((0, 2, 1)) #might have to permute, not sure yet
+        t = t.reshape(-1, 3, self.resolution + 1)#.permute((0, 2, 1))
+        print(f't: {t.shape}')
 
-        min_t = torch.where(t > -1 * self.grid_size, t, self.grid_size)
-        valid_t = torch.where(min_t < self.grid_size, min_t, self.grid_size)
+        print(f'slices: {t[:, :, 0]}')
+        print(f'slice shape: {t[:, :, 0].shape}')
 
-        sorted_t, indecis_t = torch.sort(valid_t, dim=1)
+        maximums = torch.max(t[:, :, 0], dim=1)
+        print(f'maxs: {maximums[0:2]}')
 
-        print(f'valid t: {sorted_t.shape}')
-        print(sorted_t[0:2])
+        minimums = torch.min(t[:, :, -1], dim=1)
+        print(f'mins: {minimums[0:2]}')
 
-        #scale and then round to indecis
-        #can be optimized if the CENTERS of the bounding boxes are used instead!!!!
-        #can get rid of addition
-        #can get rid of unused corners
+        #t = t + self.grid_size / 2  # small enough to not go to neighboring bounding boxes, gets inbetween indecis
+        #min_t = torch.where(t > -1 * self.grid_size, t, -1*self.grid_size) #this doent work, its t not grid size
+        #valid_t = torch.where(min_t < self.grid_size, min_t, self.grid_size)
 
         return 0
 
