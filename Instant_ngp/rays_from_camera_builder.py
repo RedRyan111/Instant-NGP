@@ -37,7 +37,7 @@ class RaysFromCameraBuilder:
         ray_directions = cam2world.transform_ray_bundle(self.directions)
         ray_origins = cam2world.expand_origin_to_match_ray_bundle_shape(ray_directions)
 
-        return ray_origins, ray_directions
+        return ray_origins.reshape(-1, 3), ray_directions.reshape(-1,3)
 
 
 def get_ray_directions_from_meshgrid(row_meshgrid, col_meshgrid):

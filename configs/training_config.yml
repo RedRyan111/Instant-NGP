@@ -5,7 +5,7 @@ positional_encoding:
 rendering_variables:
   near_threshold: 2.
   far_threshold: 6.
-  depth_samples_per_ray: 75
+  depth_samples_per_ray: 30
   samples_per_model_forward_pass: 10000
 
 training_variables:

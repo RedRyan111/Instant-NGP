@@ -29,7 +29,7 @@ class VoxelHash(nn.Module):
         num_of_hashes_per_dimension = size / resolution
 
         num_of_embeddings = math.ceil((resolution+1) ** 3)
-        print(f'number of embeddings: {num_of_embeddings}')
+        #print(f'number of embeddings: {num_of_embeddings}')
 
         self.embedding = nn.Embedding(num_of_embeddings, embedding_length)
 
