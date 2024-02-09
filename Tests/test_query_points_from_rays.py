@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from Instant_ngp.sample_points_from_rays import compute_query_points_from_rays, org_compute_query_points_from_rays
+from Instant_ngp.point_sampler_on_rays.nerf_point_sampler import compute_query_points_from_rays, org_compute_query_points_from_rays
 from Instant_ngp.rays_from_camera_builder import get_ray_origins_and_directions_from_pose
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

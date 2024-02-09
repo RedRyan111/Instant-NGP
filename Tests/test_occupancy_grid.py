@@ -11,8 +11,8 @@ device = get_tensor_device()
 data_manager = DataLoader(device)
 rays_from_camera_builder = RaysFromCameraBuilder(data_manager, device)
 
-size = 3
-resolution = 3
+size = 2
+resolution = 2
 embedding_length = 1
 
 voxel_hash = OccupancyManager(size, resolution, embedding_length, device)
@@ -21,7 +21,11 @@ num_iters = 1
 for i in tqdm(range(num_iters)):
     target_img, target_tform_cam2world = data_manager.get_image_and_pose(i)
 
-    ray_origins, ray_directions = rays_from_camera_builder.ray_origins_and_directions_from_pose(target_tform_cam2world)
+    #ray_origins, ray_directions = rays_from_camera_builder.ray_origins_and_directions_from_pose(target_tform_cam2world)
+
+    ray_origins = 1.1 * torch.ones(2, 3).to(device)# torch.rand(2, 3).to(device)
+    ray_directions = torch.ones(2, 3).to(device)
+    #ray_directions[0, 0] = -1
 
     print(f'ray origins: {ray_origins.shape} ray directions: {ray_directions.shape}')
 

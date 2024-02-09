@@ -1,4 +1,3 @@
-import nerfacc
 import torch
 from tqdm import tqdm
 from Instant_ngp.encode_model_inputs import EncodedModelInputs
@@ -9,7 +8,8 @@ from display_utils.display_helper import display_image, create_video
 from Instant_ngp.models.full_model import NerfModel
 from Instant_ngp.nerf_forward_pass import ModelIteratorOverRayChunks
 from Instant_ngp.positional_encoding import PositionalEncoding
-from Instant_ngp.sample_points_from_rays import PointSamplerFromRays
+#from Instant_ngp.point_sampler_on_rays.nerf_point_sampler import PointSamplerFromRays
+from Instant_ngp.point_sampler_on_rays.instant_ngp_point_sampler import PointSamplerFromRays
 from Instant_ngp.rays_from_camera_builder import RaysFromCameraBuilder
 from setup_utils import set_random_seeds, load_training_config_yaml, get_tensor_device
 
@@ -53,8 +53,6 @@ encoded_model_inputs = EncodedModelInputs(position_encoder,
                                           point_sampler,
                                           depth_samples_per_ray)
 
-estimator = nerfacc.OccGridEstimator(roi_aabb=[-5, -5, -5, 5, 5, 5], resolution=10, levels=1).to(device)
-
 psnrs = []
 for i in tqdm(range(num_iters)):
 
@@ -65,9 +63,10 @@ for i in tqdm(range(num_iters)):
     ray_origins, ray_directions = rays_from_camera_builder.ray_origins_and_directions_from_pose(target_tform_cam2world)
     print(f'ray origins: {ray_origins.shape} ray directions: {ray_directions.shape}')
 
-    ray_indices, t_starts, t_ends = estimator.sampling(ray_origins, ray_directions)
-
+    #ray_indices, t_starts, t_ends = estimator.sampling(ray_origins, ray_directions)
     print(f'ray_indecis: {ray_indices.shape} t_starts: {t_starts.shape} t_ends: {t_ends.shape}')
+
+    #query_points, depth_values = point_sampler.query_points_on_rays(ray_origins, ray_directions) custom point sampler
 
     model_forward_iterator = ModelIteratorOverRayChunks(chunksize, encoded_points_on_ray, encoded_ray_directions, depth_values,
                                                         target_img, model)
